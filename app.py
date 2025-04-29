@@ -18,14 +18,17 @@ def download_file(url, destination):
 # ----------------------------------
 @st.cache_resource
 def load_data():
+    # Correct Hugging Face URLs (use 'resolve/main' to get raw file URL)
     MOVIES_DICT_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/resolve/main/movies_dict.pkl"
     SIMILARITY_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/resolve/main/similarity.pkl"
 
+    # Download files if they do not exist
     if not os.path.exists("movies_dict.pkl"):
         download_file(MOVIES_DICT_URL, "movies_dict.pkl")
     if not os.path.exists("similarity.pkl"):
         download_file(SIMILARITY_URL, "similarity.pkl")
 
+    # Load the .pkl files into memory
     with open("movies_dict.pkl", "rb") as f:
         movies_dict = pickle.load(f)
     with open("similarity.pkl", "rb") as f:
@@ -59,11 +62,14 @@ def recommend(movie, movies, similarity):
 st.header('🎬 Movie Recommender System')
 
 try:
+    # Load the movie data and similarity matrix
     movies, similarity = load_data()
 
+    # Create a dropdown list for movie selection
     movie_list = movies['title'].values
     selected_movie = st.selectbox("🎥 Type or select a movie from the dropdown", movie_list)
 
+    # Show recommendations when the button is pressed
     if st.button('🔍 Show Recommendation'):
         recommended_movie_names, recommended_movie_posters = recommend(selected_movie, movies, similarity)
         cols = st.columns(5)
