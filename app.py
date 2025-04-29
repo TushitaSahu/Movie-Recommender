@@ -5,46 +5,26 @@ import pandas as pd
 import os
 
 # ----------------------------------
-# Google Drive Download Fix
+# Hugging Face Download Helper
 # ----------------------------------
-def download_file_from_google_drive(file_id, destination):
-    session = requests.Session()
-    URL = "https://docs.google.com/uc?export=download"
-
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = get_confirm_token(response)
-
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-
-    save_response_content(response, destination)
-
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            return value
-    return None
-
-def save_response_content(response, destination):
-    CHUNK_SIZE = 32768
+def download_file(url, destination):
+    response = requests.get(url)
+    response.raise_for_status()  # Raise error if download fails
     with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:
-                f.write(chunk)
+        f.write(response.content)
 
 # ----------------------------------
 # Load Data with Caching
 # ----------------------------------
 @st.cache_resource
 def load_data():
-    MOVIES_DICT_ID = "1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav"      # Replace with your file ID
-    SIMILARITY_ID = "1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49"       # Replace with your file ID
+    MOVIES_DICT_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/blob/main/movies_dict.pkl"
+    SIMILARITY_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/blob/main/similarity.pkl"
 
     if not os.path.exists("movies_dict.pkl"):
-        download_file_from_google_drive(MOVIES_DICT_ID, "movies_dict.pkl")
+        download_file(MOVIES_DICT_URL, "movies_dict.pkl")
     if not os.path.exists("similarity.pkl"):
-        download_file_from_google_drive(SIMILARITY_ID, "similarity.pkl")
+        download_file(SIMILARITY_URL, "similarity.pkl")
 
     with open("movies_dict.pkl", "rb") as f:
         movies_dict = pickle.load(f)
