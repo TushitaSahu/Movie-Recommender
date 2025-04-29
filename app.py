@@ -2,7 +2,6 @@ import pickle
 import streamlit as st
 import requests
 import pandas as pd
-import gzip
 import os
 
 def fetch_poster(movie_id):
@@ -28,16 +27,33 @@ st.header('🎬 Movie Recommender System')
 movies_dict_file = st.file_uploader("Upload movies_dict.pkl", type="pkl")
 similarity_file = st.file_uploader("Upload similarity.pkl", type="pkl")
 
+# Define a temporary directory to save files
+temp_dir = "temp_files"
+os.makedirs(temp_dir, exist_ok=True)
+
 # Check if both files are uploaded
 if movies_dict_file is not None and similarity_file is not None:
-    # Load movies_dict
-    movies_dict = pickle.load(movies_dict_file)
+    # Save the uploaded files to the temporary directory
+    movies_dict_path = os.path.join(temp_dir, "movies_dict.pkl")
+    similarity_path = os.path.join(temp_dir, "similarity.pkl")
+
+    # Save the movies_dict.pkl file
+    with open(movies_dict_path, "wb") as f:
+        f.write(movies_dict_file.getbuffer())
+
+    # Save the similarity.pkl file
+    with open(similarity_path, "wb") as f:
+        f.write(similarity_file.getbuffer())
+
+    st.success("Files successfully uploaded and saved!")
+
+    # Load models (from the saved temporary files)
+    with open(movies_dict_path, "rb") as f:
+        movies_dict = pickle.load(f)
     movies = pd.DataFrame(movies_dict)
 
-    # Load similarity matrix
-    similarity = pickle.load(similarity_file)
-    
-    st.success("Files successfully uploaded and loaded!")
+    with open(similarity_path, "rb") as f:
+        similarity = pickle.load(f)
 
     # UI for movie recommendation
     movie_list = movies['title'].values
@@ -50,6 +66,6 @@ if movies_dict_file is not None and similarity_file is not None:
             with cols[i]:
                 st.text(recommended_movie_names[i])
                 st.image(recommended_movie_posters[i])
+
 else:
     st.warning("Please upload the required files: 'movies_dict.pkl' and 'similarity.pkl'.")
-
