@@ -2,17 +2,8 @@ import pickle
 import streamlit as st
 import requests
 import pandas as pd
-import os
-import zipfile
-import os
-import pickle
 import gzip
-
-with gzip.open("movies_dict.pkl.gz", "wb") as f:
-    pickle.dump(movies_dict, f)
-with gzip.open("movies_dict.pkl.gz", "rb") as f:
-    movies_dict = pickle.load(f)
-
+import os
 
 def fetch_poster(movie_id):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US"
@@ -33,26 +24,32 @@ def recommend(movie):
 
 st.header('🎬 Movie Recommender System')
 
-# ✅ Load models safely
-if os.path.exists('movies_dict.pkl') and os.path.exists('similarity.pkl'):
-    with open('movies_dict.pkl', 'rb') as f:
-        movies_dict = pickle.load(f)
+# Upload files (pickle files)
+movies_dict_file = st.file_uploader("Upload movies_dict.pkl", type="pkl")
+similarity_file = st.file_uploader("Upload similarity.pkl", type="pkl")
+
+# Check if both files are uploaded
+if movies_dict_file is not None and similarity_file is not None:
+    # Load movies_dict
+    movies_dict = pickle.load(movies_dict_file)
     movies = pd.DataFrame(movies_dict)
 
-    with open('similarity.pkl', 'rb') as f:
-        similarity = pickle.load(f)
+    # Load similarity matrix
+    similarity = pickle.load(similarity_file)
+    
+    st.success("Files successfully uploaded and loaded!")
+
+    # UI for movie recommendation
+    movie_list = movies['title'].values
+    selected_movie = st.selectbox("🎥 Type or select a movie from the dropdown", movie_list)
+
+    if st.button('🔍 Show Recommendation'):
+        recommended_movie_names, recommended_movie_posters = recommend(selected_movie)
+        cols = st.columns(5)
+        for i in range(5):
+            with cols[i]:
+                st.text(recommended_movie_names[i])
+                st.image(recommended_movie_posters[i])
 else:
-    st.error("❌ Required files not found: 'movies_dict.pkl' or 'similarity.pkl'. Please upload them or add them to your repo.")
-    st.stop()
+    st.warning("Please upload the required files: 'movies_dict.pkl' and 'similarity.pkl'.")
 
-# UI
-movie_list = movies['title'].values
-selected_movie = st.selectbox("🎥 Type or select a movie from the dropdown", movie_list)
-
-if st.button('🔍 Show Recommendation'):
-    recommended_movie_names, recommended_movie_posters = recommend(selected_movie)
-    cols = st.columns(5)
-    for i in range(5):
-        with cols[i]:
-            st.text(recommended_movie_names[i])
-            st.image(recommended_movie_posters[i])
