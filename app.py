@@ -39,7 +39,7 @@ def save_response_content(response, destination):
 @st.cache_resource
 def load_data():
     MOVIES_DICT_ID = "1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav"      # Replace with your file ID
-    SIMILARITY_ID = "eLFj2e5nmqGKjJ5Kq49"       # Replace with your file ID
+    SIMILARITY_ID = "1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49"       # Replace with your file ID
 
     if not os.path.exists("movies_dict.pkl"):
         download_file_from_google_drive(MOVIES_DICT_ID, "movies_dict.pkl")
