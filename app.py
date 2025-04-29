@@ -5,8 +5,8 @@ import pandas as pd
 import os
 
 # ----------- CONFIG -------------
-MOVIES_DICT_URL = "https://your-host.com/movies_dict.pkl"
-SIMILARITY_URL = "https://your-host.com/similarity.pkl"
+MOVIES_DICT_URL = "https://drive.google.com/file/d/1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav/view?usp=sharing"
+SIMILARITY_URL = "https://drive.google.com/file/d/1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49/view?usp=sharing"
 
 # ----------- UTILITIES -------------
 @st.cache_resource
