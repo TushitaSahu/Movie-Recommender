@@ -4,33 +4,58 @@ import requests
 import pandas as pd
 import os
 
-# ----------- CONFIG -------------
-MOVIES_DICT_URL = "https://drive.google.com/uc?export=download&id=1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav"
-SIMILARITY_URL = "https://drive.google.com/uc?export=download&id=1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49"
+# ----------------------------------
+# Google Drive Download Fix
+# ----------------------------------
+def download_file_from_google_drive(file_id, destination):
+    session = requests.Session()
+    URL = "https://docs.google.com/uc?export=download"
 
-# ----------- UTILITIES -------------
-@st.cache_resource
-def download_file(url, filename):
-    if not os.path.exists(filename):
-        r = requests.get(url)
-        with open(filename, 'wb') as f:
-            f.write(r.content)
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    token = get_confirm_token(response)
 
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, destination)
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+# ----------------------------------
+# Load Data with Caching
+# ----------------------------------
 @st.cache_resource
 def load_data():
-    # Download only if not already downloaded
-    download_file(MOVIES_DICT_URL, "movies_dict.pkl")
-    download_file(SIMILARITY_URL, "similarity.pkl")
+    MOVIES_DICT_ID = "1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav"      # Replace with your file ID
+    SIMILARITY_ID = "1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49"       # Replace with your file ID
 
-    # Load files
+    if not os.path.exists("movies_dict.pkl"):
+        download_file_from_google_drive(MOVIES_DICT_ID, "movies_dict.pkl")
+    if not os.path.exists("similarity.pkl"):
+        download_file_from_google_drive(SIMILARITY_ID, "similarity.pkl")
+
     with open("movies_dict.pkl", "rb") as f:
         movies_dict = pickle.load(f)
-
     with open("similarity.pkl", "rb") as f:
         similarity = pickle.load(f)
 
     return pd.DataFrame(movies_dict), similarity
 
+# ----------------------------------
+# Recommender Functions
+# ----------------------------------
 def fetch_poster(movie_id):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US"
     data = requests.get(url).json()
@@ -48,7 +73,9 @@ def recommend(movie, movies, similarity):
         recommended_movie_posters.append(fetch_poster(movie_id))
     return recommended_movie_names, recommended_movie_posters
 
-# ----------- STREAMLIT UI -------------
+# ----------------------------------
+# Streamlit UI
+# ----------------------------------
 st.header('🎬 Movie Recommender System')
 
 try:
@@ -66,4 +93,4 @@ try:
                 st.image(recommended_movie_posters[i])
 
 except Exception as e:
-    st.error(f"Failed to load data: {e}")
+    st.error(f"❌ Failed to load data: {e}")
