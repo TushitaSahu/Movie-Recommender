@@ -18,8 +18,8 @@ def download_file(url, destination):
 # ----------------------------------
 @st.cache_resource
 def load_data():
-    MOVIES_DICT_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/blob/main/movies_dict.pkl"
-    SIMILARITY_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/blob/main/similarity.pkl"
+    MOVIES_DICT_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/resolve/main/movies_dict.pkl"
+    SIMILARITY_URL = "https://huggingface.co/datasets/tushitasahu/movies_dict.pkl/resolve/main/similarity.pkl"
 
     if not os.path.exists("movies_dict.pkl"):
         download_file(MOVIES_DICT_URL, "movies_dict.pkl")
