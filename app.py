@@ -3,6 +3,25 @@ import streamlit as st
 import requests
 import pandas as pd
 import os
+import zipfile
+import os
+
+if not os.path.exists("movies_dict.pkl") or not os.path.exists("similarity.pkl"):
+    with zipfile.ZipFile("data.zip", 'r') as zip_ref:
+        zip_ref.extractall()
+import requests
+
+def download_file(url, filename):
+    r = requests.get(url)
+    with open(filename, 'wb') as f:
+        f.write(r.content)
+
+if not os.path.exists("movies_dict.pkl"):
+    download_file("https://your_link/movies_dict.pkl", "movies_dict.pkl")
+
+if not os.path.exists("similarity.pkl"):
+    download_file("https://your_link/similarity.pkl", "similarity.pkl")
+
 
 def fetch_poster(movie_id):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US"
