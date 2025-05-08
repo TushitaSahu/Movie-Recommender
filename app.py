@@ -2,7 +2,7 @@ import pickle
 import streamlit as st
 import requests
 import pandas as pd
-import gzip
+import gdown
 import os
 
 def fetch_poster(movie_id):
@@ -24,31 +24,35 @@ def recommend(movie):
 
 st.header('🎬 Movie Recommender System')
 
-# Upload files (pickle files)
-movies_dict_file = st.file_uploader("Upload movies_dict.pkl", type="pkl")
-similarity_file = st.file_uploader("Upload similarity.pkl", type="pkl")
+# Google Drive file IDs (replace with your own)
+movies_dict_id = '1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav'
+similarity_id = '1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49'
 
-# Check if both files are uploaded
-if movies_dict_file is not None and similarity_file is not None:
-    # Load movies_dict
-    movies_dict = pickle.load(movies_dict_file)
-    movies = pd.DataFrame(movies_dict)
+# Download from Google Drive
+if not os.path.exists("movies_dict.pkl"):
+    gdown.download(f'https://drive.google.com/uc?id={1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav}', 'movies_dict.pkl', quiet=False)
 
-    # Load similarity matrix
-    similarity = pickle.load(similarity_file)
-    
-    st.success("Files successfully uploaded and loaded!")
+if not os.path.exists("similarity.pkl"):
+    gdown.download(f'https://drive.google.com/uc?id={1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49}', 'similarity.pkl', quiet=False)
 
-    # UI for movie recommendation
-    movie_list = movies['title'].values
-    selected_movie = st.selectbox("🎥 Type or select a movie from the dropdown", movie_list)
+# Load data
+with open("movies_dict.pkl", "rb") as f:
+    movies_dict = pickle.load(f)
+movies = pd.DataFrame(movies_dict)
 
-    if st.button('🔍 Show Recommendation'):
-        recommended_movie_names, recommended_movie_posters = recommend(selected_movie)
-        cols = st.columns(5)
-        for i in range(5):
-            with cols[i]:
-                st.text(recommended_movie_names[i])
-                st.image(recommended_movie_posters[i])
-else:
-    st.warning("Please upload the required files: 'movies_dict.pkl' and 'similarity.pkl'.")
+with open("similarity.pkl", "rb") as f:
+    similarity = pickle.load(f)
+
+st.success("Files successfully loaded from Google Drive!")
+
+# UI
+movie_list = movies['title'].values
+selected_movie = st.selectbox("🎥 Type or select a movie from the dropdown", movie_list)
+
+if st.button('🔍 Show Recommendation'):
+    recommended_movie_names, recommended_movie_posters = recommend(selected_movie)
+    cols = st.columns(5)
+    for i in range(5):
+        with cols[i]:
+            st.text(recommended_movie_names[i])
+            st.image(recommended_movie_posters[i])
