@@ -30,7 +30,7 @@ similarity_id = '1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49'
 
 # Download from Google Drive
 if not os.path.exists("movies_dict.pkl"):
-    gdown.download(f'https://drive.google.com/uc?id={1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav'}, 'movies_dict.pkl', quiet=False)
+    gdown.download(f'https://drive.google.com/uc?id={1-76kvs2fIBv32kiwy6uxZMxH2gOiqNav}', 'movies_dict.pkl', quiet=False)
 
 if not os.path.exists("similarity.pkl"):
     gdown.download(f'https://drive.google.com/uc?id={1EpniYnuErwxDUeLFj2e5nmqGKjJ5Kq49}', 'similarity.pkl', quiet=False)
